@@ -27,6 +27,24 @@
     };
   };
 
+  var combineReducers = function(reducers) {
+    var rootReducer = function(state, action) {
+      var newState = {};
+      var subReducerNames = Object.keys(state);
+      var len = subReducerNames.length;
+      for (var i = 0; i < len; i++) {
+        var subReducerName = subReducerNames[i];
+        var subReducer = reducers[subReducerName];
+        var oldSubState = state[subReducerName];
+        var newSubState = subReducer(oldSubState, action);
+        newState[subReducerName] = newSubState;
+      }
+      return newState;
+    };
+    return rootReducer;
+  };
+
   redux.createStore = createStore;
+  redux.combineReducers = combineReducers;
   g.redux = redux;
 })(window);
