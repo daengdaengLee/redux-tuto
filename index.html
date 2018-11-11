@@ -5,16 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <script src="./redux.js"></script>
-    <script src="./counter-reducer.js"></script>
+    <script src="./users-reducer.js"></script>
+    <script src="./posts-reducer.js"></script>
     <title>redux-tuto</title>
+    <style>
+      .editor label {
+        display: block;
+      }
+    </style>
   </head>
   <body>
     <div id="root">
-      <div class="buttons">
-        <button type="button" class="plus">+</button>
-        <button type="button" class="minus">-</button>
+      <div class="auth">
+        <input type="text" name="username" class="username" />
+        <button type="button" class="sign_in">sign in</button>
+        <button type="button" class="sign_out">sign out</button>
       </div>
-      <div class="display"></div>
+      <div class="editor">
+        <span>Editor</span> <button type="button" class="add">Add</button>
+        <label>
+          <span>title</span> <input type="text" name="title" class="title" />
+        </label>
+        <label>
+          <span>content</span>
+          <textarea name="content" class="content"></textarea>
+        </label>
+      </div>
+      <ul class="list"></ul>
     </div>
   </body>
   <script src="./index.js"></script>

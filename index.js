@@ -4,42 +4,136 @@
   var reducers = g.reducers;
 
   var createStore = redux.createStore;
-  var counters = reducers.counters;
-  var counterReducer = counters.reducer;
-  var increment = counters.increment;
-  var decrement = counters.decrement;
+  var combineReducers = redux.combineReducers;
+  var users = reducers.users;
+  var usersReducer = users.reducer;
+  var signin = users.signin;
+  var signout = users.signout;
+  var posts = reducers.posts;
+  var postsReducer = posts.reducer;
+  var add = posts.add;
+  var remove = posts.remove;
 
   // create redux store
-  var initState = { num: 0 };
-  var store = createStore(counterReducer, initState);
+  var initState = {
+    users: { username: null },
+    posts: { postsById: {}, allPostIds: [] },
+  };
+  var rootReducer = combineReducers({
+    users: usersReducer,
+    posts: postsReducer,
+  });
+  var store = createStore(rootReducer, initState);
 
   // get DOM elements
-  var plusButtonEl = document.querySelector('.buttons .plus');
-  var minusButtonEl = document.querySelector('.buttons .minus');
+  var usernameEl = document.querySelector('.auth .username');
+  var signinEl = document.querySelector('.auth .sign_in');
+  var singoutEl = document.querySelector('.auth .sign_out');
 
-  var displayEl = document.querySelector('.display');
+  var titleEl = document.querySelector('.editor .title');
+  var contentEl = document.querySelector('.editor .content');
+  var addEl = document.querySelector('.editor .add');
+
+  var listEl = document.querySelector('.list');
 
   // make event listener functions
-  var onClickPlusButton = function() {
-    store.dispatch(increment());
+  var onClickSignIn = function() {
+    var username = usernameEl.value.trim();
+    if (!username) return alert('Please input username!');
+    store.dispatch(signin(username));
   };
-  var onClickMinusButton = function() {
-    store.dispatch(decrement());
+
+  var onClickSignOut = function() {
+    store.dispatch(signout());
+  };
+
+  var onClickAdd = function() {
+    var username = store.getState().users.username;
+    var postId = Date.now().toString();
+    var title = titleEl.value.trim();
+    var content = contentEl.value.trim();
+    if (!username) return alert('Sign in first!');
+    if (!title || !content) return alert('Please input title and content');
+    store.dispatch(add(username, postId, title, content));
+  };
+
+  var onClickRemove = function(event) {
+    var username = store.getState().users.username;
+    var postsById = store.getState().posts.postsById;
+    var postId = event.target.dataset.postId;
+    var post = postsById[postId];
+    if (username !== post.creator)
+      return alert("Cannot delete other user's post!");
+    store.dispatch(remove(postId));
   };
 
   // make render function
-  var render = function() {
-    var state = store.getState();
-    displayEl.textContent = state.num;
+  var renderUsername = function() {
+    var username = store.getState().users.username;
+    usernameEl.value = username;
+  };
+
+  var renderEditor = function() {
+    var username = store.getState().users.username;
+    if (username) {
+      addEl.disabled = false;
+      titleEl.disabled = false;
+      contentEl.disabled = false;
+    } else {
+      addEl.disabled = true;
+      titleEl.disabled = true;
+      contentEl.disabled = true;
+    }
+  };
+
+  var renderList = function() {
+    listEl.innerHTML = '';
+
+    var posts = store.getState().posts;
+    var allPostIds = posts.allPostIds;
+    var postsById = posts.postsById;
+    var len = allPostIds.length;
+    for (var i = 0; i < len; i++) {
+      var postId = allPostIds[i];
+      var post = postsById[postId];
+      var templete = `
+        <li>
+          <button type="button" class="remove" data-post-id="${postId}">Remove</button>
+          <div>
+            Title : ${post.title}
+          </div>
+          <div>
+            Creator : ${post.creator}
+          </div>
+          <div>
+            Content :
+            <p>
+              ${post.content}
+            </p>
+          </div>
+        </li>
+      `;
+      var parent = document.createElement('div');
+      parent.innerHTML = templete;
+      var liEl = parent.children[0];
+      var removeEl = liEl.querySelector('.remove');
+      removeEl.addEventListener('click', onClickRemove);
+      listEl.appendChild(liEl);
+    }
   };
 
   // subscribe events
-  plusButtonEl.addEventListener('click', onClickPlusButton);
-  minusButtonEl.addEventListener('click', onClickMinusButton);
+  signinEl.addEventListener('click', onClickSignIn);
+  singoutEl.addEventListener('click', onClickSignOut);
+  addEl.addEventListener('click', onClickAdd);
 
   // subscribe store update
-  store.subscribe(render);
+  store.subscribe(renderUsername);
+  store.subscribe(renderEditor);
+  store.subscribe(renderList);
 
   // initial rendering
-  render();
+  renderUsername();
+  renderEditor();
+  renderList();
 })(window);
