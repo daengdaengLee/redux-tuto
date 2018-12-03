@@ -2,12 +2,14 @@
   // import modules
   var redux = g.redux;
   var reducers = g.reducers;
+  var reduxMiddlewares = g.reduxMiddlewares;
 
   var createStore = redux.createStore;
   var combineReducers = redux.combineReducers;
+  var applyMiddleware = redux.applyMiddleware;
   var users = reducers.users;
   var usersReducer = users.reducer;
-  var signin = users.signin;
+  var signinStart = users.signinStart;
   var signout = users.signout;
   var posts = reducers.posts;
   var postsReducer = posts.reducer;
@@ -23,7 +25,11 @@
     users: usersReducer,
     posts: postsReducer,
   });
-  var store = createStore(rootReducer, initState);
+  var store = createStore(
+    rootReducer,
+    initState,
+    applyMiddleware(reduxMiddlewares.logger, reduxMiddlewares.auth),
+  );
 
   // get DOM elements
   var usernameEl = document.querySelector('.auth .username');
@@ -40,7 +46,7 @@
   var onClickSignIn = function() {
     var username = usernameEl.value.trim();
     if (!username) return alert('Please input username!');
-    store.dispatch(signin(username));
+    store.dispatch(signinStart(username));
   };
 
   var onClickSignOut = function() {

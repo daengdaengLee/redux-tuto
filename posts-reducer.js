@@ -18,7 +18,7 @@
     var postId = action.postId;
     var creator = action.creator;
     var title = action.title;
-    var content = action.title;
+    var content = action.content;
 
     if (!creator || !title || !content) return state;
 
